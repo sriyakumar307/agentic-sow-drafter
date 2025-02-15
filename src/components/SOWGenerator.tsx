@@ -8,8 +8,17 @@ import { useToast } from "@/hooks/use-toast";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SOWFormData {
+  sowType: string;
+  workType: string;
   projectObjectives: string;
   projectScope: string;
   servicesDescription: string;
@@ -24,6 +33,8 @@ interface SOWFormData {
 
 const SOWGenerator = () => {
   const [formData, setFormData] = useState<SOWFormData>({
+    sowType: "",
+    workType: "",
     projectObjectives: "",
     projectScope: "",
     servicesDescription: "",
@@ -45,6 +56,13 @@ const SOWGenerator = () => {
     setFormData((prev) => ({
       ...prev,
       [field]: e.target.value,
+    }));
+  };
+
+  const handleSelectChange = (field: keyof SOWFormData) => (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
     }));
   };
 
@@ -83,6 +101,40 @@ const SOWGenerator = () => {
       <ResizablePanel defaultSize={40} minSize={30}>
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="sowType" className="text-base">SOW Type</Label>
+                <Select
+                  value={formData.sowType}
+                  onValueChange={handleSelectChange("sowType")}
+                >
+                  <SelectTrigger id="sowType">
+                    <SelectValue placeholder="Select SOW type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixed">Fixed Price</SelectItem>
+                    <SelectItem value="tm">Time & Material</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="workType" className="text-base">Work Type</Label>
+                <Select
+                  value={formData.workType}
+                  onValueChange={handleSelectChange("workType")}
+                >
+                  <SelectTrigger id="workType">
+                    <SelectValue placeholder="Select work type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="discovery">Discovery</SelectItem>
+                    <SelectItem value="implementation">Implementation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="projectObjectives" className="text-base font-semibold">
                 Project Objectives <span className="text-red-500">*</span>
