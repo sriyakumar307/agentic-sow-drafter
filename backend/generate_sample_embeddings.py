@@ -169,6 +169,12 @@ Mandatory response contents
             """,
             metadata={"id": 1, "fileName": "TEXAS_DIR_SOW"},
         ),
+         Document(    
+            page_content="""
+				2nd Document
+            """,
+            metadata={"id": 1, "fileName": "TEXAS_DIR_SOW"},
+        ),
     ]
 
 vector_store.add_documents(docs, ids=[doc.metadata["id"] for doc in docs])
