@@ -78,8 +78,22 @@ def generate_sow():
             f"Deliverables are {deliverables}.\n"
             f"Project Timeline and Schedule is {project_timeline}."
         )
+        user_query_map = {
+            "sow_type": sow_type,
+            "work_type": work_type,
+            "project_objectives": project_objectives,
+            "project_scope": project_scope,
+            "detailed_desc": detailed_desc,
+            "specific_feature": specific_feature,
+            "platform_tech": platform_tech,
+            "integrations": integrations,
+            "design_specification": design_specification,
+            "out_of_scope": out_of_scope,
+            "deliverables": deliverables,
+            "project_timeline": project_timeline
+        }
 
-        response = graph_agentor.invoke({ 'user_query': user_query })
+        response = graph_agentor.invoke({ 'user_query': user_query, 'query_map': user_query_map })
         
 
         # Process the data (For now, we just return a formatted response)
