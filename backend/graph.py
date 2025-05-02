@@ -8,6 +8,7 @@ import docx
 import json
 import re
 from transformers import pipeline
+from docx.shared import Pt
 
 # using the new ComplianceAgent from compliance_checker.py.
 from compliance_checker import ComplianceAgent
@@ -15,8 +16,9 @@ from compliance_checker import ComplianceAgent
 # Initialize the toxicity classifier.
 toxicity_classifier = pipeline("text-classification", model="unitary/unbiased-toxic-roberta")
 
-# Define our state with optional fields for errors, validated data, compliance results, and final formatted output.
+# Define our state
 class State(TypedDict, total=False):
+    query_map: dict
     user_query: str
     additional_context: str
     sow: str            # SOW as a JSON string (or raw text) produced by the drafting agent.
@@ -54,7 +56,6 @@ def extract_raw_json(response_text):
 
 
 def drafting_agent(state: State):
-    # If there is any error from previous iterations (including those from compliance), include it in the prompt.
     if state.get('error'):
         previous_content = state.get('sow', '')
         instruction = (f"Below is the previously generated content: {previous_content} "
@@ -62,14 +63,13 @@ def drafting_agent(state: State):
                        f"Please revise the content accordingly.")
     else:
         instruction = ""
-    
-    prompt = drafting_prompt_template.invoke(
-        {
-            "query": state['user_query'],
-            "context": state['additional_context'],
-            "instruction": instruction
-        }
-    )
+
+    prompt = drafting_prompt_template.invoke({
+        "query": state['user_query'],
+        "additional_context": state['additional_context'],
+        "feedback": instruction,
+        **state['query_map']
+    })
     response = model.invoke(prompt)
     return { 'sow': response.content }
 
@@ -106,7 +106,6 @@ def compliance_agent(state: State):
         state['error'] = error_message
     return state
 
-# returns an error message instead of raising an exception.
 def validate_text(text, threshold=0.75):
     try:
         result = toxicity_classifier(text)[0]
@@ -124,7 +123,6 @@ def validate_text(text, threshold=0.75):
         return text, error_msg
     return text, None
 
-# collects errors rather than throwing exceptions.
 def validate_sow_data(sow_data):
     validated_data = {}
     errors = {}
@@ -147,7 +145,6 @@ def validate_sow_data(sow_data):
                 errors[key] = error
     return validated_data, errors
 
-# extract a JSON formatted version of the SOW using the LLM.
 def extract_json_from_sow(raw_sow: str) -> dict:
     extraction_prompt = (
         '''"Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date", "Insight Global", "Client", "Agreement Date",
@@ -166,18 +163,19 @@ def extract_json_from_sow(raw_sow: str) -> dict:
     except Exception as e:
         raise ValueError("Failed to extract JSON from SOW content: " + str(e))
 
-# validation agent attempts to parse and validate the SOW.
 def validation_agent(state: State):
     try:
         try:
             sow_data = json.loads(state['sow'])
         except Exception as parse_error:
             sow_data = extract_json_from_sow(state['sow'])
+
         validated_data, errors = validate_sow_data(sow_data)
         if errors:
             state['error'] = json.dumps(errors)
             return { 'feedback': 'REJECTED', 'retryCount': state['retryCount'] + 1 }
         else:
+            state['validated_sow'] = validated_data
             state.pop('error', None)
             return { 'feedback': 'ACCEPTED', 'validated_sow': validated_data }
     except Exception as e:
@@ -279,6 +277,7 @@ graph_builder.add_conditional_edges(
         'REJECTED': 'drafting_agent'
     }
 )
+
 graph_builder.add_edge('formatting_agent', END)
 
 graph_agentor = graph_builder.compile()
