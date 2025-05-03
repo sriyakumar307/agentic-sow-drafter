@@ -1,6 +1,6 @@
 from typing_extensions import TypedDict
 from llm import model
-from prompt import drafting_prompt_template
+from prompt import drafting_prompt_template, drafting_chat_prompt
 from vector_rag import retriever
 from langgraph.graph import StateGraph, START, END
 import os
@@ -18,6 +18,8 @@ toxicity_classifier = pipeline("text-classification", model="unitary/unbiased-to
 
 # Define our state
 class State(TypedDict, total=False):
+    flow: str
+    previous_sow: str
     query_map: dict
     user_query: str
     additional_context: str
@@ -64,21 +66,30 @@ def drafting_agent(state: State):
     else:
         instruction = ""
 
-    prompt = drafting_prompt_template.invoke({
-        "query": state['user_query'],
-        "additional_context": state['additional_context'],
-        "feedback": instruction,
-        **state['query_map']
-    })
-    response = model.invoke(prompt)
-    return { 'sow': response.content }
+    if state.get('flow') == 'chat':
+        prompt = drafting_chat_prompt.invoke({
+            "user_query": state['user_query'],
+            "previous_sow": state['previous_sow'],
+            "feedback": instruction,
+        })
+        response = model.invoke(prompt)
+        return { 'sow': response.content }
+    else: 
+        prompt = drafting_prompt_template.invoke({
+            "query": state['user_query'],
+            "additional_context": state['additional_context'],
+            "feedback": instruction,
+            **state['query_map']
+        })
+        response = model.invoke(prompt)
+        return { 'sow': response.content }
 
 def compliance_agent(state: State):
     # Use the  ComplianceAgent to analyze the SOW.
     agent = ComplianceAgent()
     try:
         # Attempt to parse the SOW as JSON
-        sow_data = extract_raw_json(state['sow'])
+        sow_data = json.loads(state['sow'])
     except Exception:
         # If parsing fails, treat the entire text as the content to check.
         sow_data = {"sow_text": state['sow']}
@@ -147,12 +158,14 @@ def validate_sow_data(sow_data):
 
 def extract_json_from_sow(raw_sow: str) -> dict:
     extraction_prompt = (
-        '''"Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date", "Insight Global", "Client", "Agreement Date",
-"Client Contact", "Insight Global Contact", "Services Description", "Deliverables",
-"Milestones", "Acceptance", "Personnel and Locations", "Insight Global Representatives",
-"Client Representatives", "Insight Global Contractor Resources", "Term", "Fees", "Expenses",
+        '''
+        Extract the following fields from the given Statement of Work into a JSON object with these keys: 
+        "Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date","Company Information", "Client", "Agreement Date",
+"Client Contact", "Contact", "Services Description", "Deliverables",
+"Milestones", "Acceptance", "Personnel and Locations", "Representatives",
+"Client Representatives", "Contractor Resources", "Term", "Fees", "Expenses",
 "Taxes", "Conversion", "Limitation of Liability", "Service Level Agreement", "Assumptions", "Scope of Work",
-"Change Process", "Payment Terms", "Timeline".
+"Change Process", "Payment Terms", "Timeline", "Company Name", "Client Name",
 ''' + raw_sow +
         "\n\nOutput the result as a valid JSON and do not format just return pure json."
     )
@@ -192,8 +205,8 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     markdown += f'## {sow_data["Project Name"]}\n\n'
     
     intro = (f"This Statement of Work (“SOW”) is entered into as of {sow_data['SOW Effective Date']} by and between "
-             f"{sow_data['Insight Global']} (“Insight Global”) and {sow_data['Client']} (“Client”) under the provisions of "
-             f"that certain Master Services Agreement, dated as of {sow_data['Agreement Date']}, by and between Insight Global and Client (the “Agreement”).")
+             f"{sow_data['Company Information']} (“{sow_data['Company Name']}”) and {sow_data['Client']} (“{sow_data['Client Name'] or 'Client'}”) under the provisions of "
+             f"that certain Master Services Agreement, dated as of {sow_data['Agreement Date']}, by and between {sow_data['Company Name']} and {sow_data['Client Name'] or 'Client'} (the “Agreement”).")
     doc.add_paragraph(intro)
     markdown += f"{intro}{newLineChar}"
     
@@ -204,8 +217,8 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     
     section_order = [
         "Services Description", "Deliverables", "Milestones", "Acceptance",
-        "Personnel and Locations", "Insight Global Representatives", "Client Representatives",
-        "Insight Global Contractor Resources", "Term", "Fees", "Expenses", "Taxes", "Conversion",
+        "Personnel and Locations", "Representatives", "Client Representatives",
+        "Contractor Resources", "Term", "Fees", "Expenses", "Taxes", "Conversion",
         "Limitation of Liability", "Service Level Agreement", "Assumptions", "Change Process"
     ]
     for section in section_order:
@@ -217,15 +230,36 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
         except Exception as e:
             doc.add_paragraph('')
             markdown += newLineChar 
+    
+        
+
+    #Current State Analysis section
+
+    if "Current State Analysis" in sow_data:
+        doc.add_heading("Current State Analysis", level=1)
+        markdown += f"## Current State Analysis{newLineChar}"
+        doc.add_paragraph(sow_data["Current State Analysis"])
+        markdown += f"{sow_data['Current State Analysis']}{newLineChar}"
+
+
+
+    #Gap Analysis section
+
+    if "Gap Analysis" in sow_data:
+        doc.add_heading("Gap Analysis", level=1)
+        markdown += f"## Gap Analysis{newLineChar}"
+        doc.add_paragraph(sow_data["Gap Analysis"])
+        markdown += f"{sow_data['Gap Analysis']}{newLineChar}"
+
     # Signature section.
     doc.add_heading("IN WITNESS WHEREOF", level=1)
     markdown += f"IN WITNESS WHEREOF{newLineChar}"
     doc.add_paragraph("Authorized signatures effective as of the effective date of this SOW.")
     markdown += f"Authorized signatures effective as of the effective date of this SOW.{newLineChar}"
-    doc.add_paragraph("Client Signature: ________________")
-    markdown += f"Client Signature: ________________{newLineChar}"
-    doc.add_paragraph("Insight Global Signature: ________________")
-    markdown += f"Insight Global Signature: ________________{newLineChar}"
+    doc.add_paragraph(f"{sow_data['Client Name'] or 'Client'}  Signature: ________________")
+    markdown += f"{sow_data['Client Name'] or 'Client'} Signature: ________________{newLineChar}"
+    doc.add_paragraph(f"{sow_data['Company Name'] or ''} Signature: ________________")
+    markdown += f"{sow_data['Company Name'] or ''} Signature: ________________{newLineChar}"
 
     static_folder = os.path.join(os.path.dirname(__file__), 'static')
     if not os.path.exists(static_folder):

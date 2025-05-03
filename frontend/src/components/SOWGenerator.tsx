@@ -1,11 +1,10 @@
-
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { Card } from "@/components/ui/card";
-import { Loader2, Download } from "lucide-react";
+import { Loader2, Download, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Label } from "@/components/ui/label";
@@ -45,7 +44,7 @@ const defaultValues = {
 5.2.	Final presentation of findings and recommendations
 5.3.	Proposed implementation roadmap
 `,
-  servicesDescription: `.  Insight Global will provide the following Services: 
+  servicesDescription: `HeapSync will provide the following Services: 
 2.1.	Stakeholder Engagement and Current State Analysis A thorough review of existing systems and processes through structured interviews and documentation review.
 2.2.	Technical Evaluation Detailed assessment of current architecture, system capabilities, and integration points.
 2.3.	Gap Analysis and Recommendations Comprehensive analysis of current state versus industry best practices, leading to actionable recommendations.
@@ -59,8 +58,8 @@ const defaultValues = {
   platformsTechnologies: "",
   integrations: "",
   designSpecifications: "",
-  outOfScope: `As a condition for recovery of any liability, the parties must assert any claim under this SOW within three (3) months after discovery or sixty (60) days after the termination or expiration of this SOW, whichever is earlier. In no event will either party to this Agreement be liable for incidental, consequential, punitive, indirect or special damages, including, without limitation, interruption or loss of business, profit or goodwill.  In no event shall Insight Global’s liability to Client exceed the fees received from Client under this SOW during the six (6) month period preceding the claim to which the liability relates, whether arising from an alleged breach of the Agreement or this SOW, an alleged tort, or any other cause of action.`,
-  deliverables: `.  Insight Global will provide the following Deliverables: 
+  outOfScope: `As a condition for recovery of any liability, the parties must assert any claim under this SOW within three (3) months after discovery or sixty (60) days after the termination or expiration of this SOW, whichever is earlier. In no event will either party to this Agreement be liable for incidental, consequential, punitive, indirect or special damages, including, without limitation, interruption or loss of business, profit or goodwill.  In no event shall HeapSync's liability to Client exceed the fees received from Client under this SOW during the six (6) month period preceding the claim to which the liability relates, whether arising from an alleged breach of the Agreement or this SOW, an alleged tort, or any other cause of action.`,
+  deliverables: `.  HeapSync will provide the following Deliverables: 
 3.1.	Current State Analysis report of existing systems, data flows, and identified opportunities for improvement.
 3.2.	Technical Assessment report with detailed evaluation of current architecture, including integration analysis and technology stack assessment.
 3.3.	Final Recommendations report of complete modernization strategy including target architecture, implementation roadmap, and strategy
@@ -99,8 +98,19 @@ const SOWGenerator = () => {
     timeline: "",
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isChaGenerating, setIsChaGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
   const { toast } = useToast();
+  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
 
   const handleChange = (field: keyof SOWFormData) => (
     e: React.ChangeEvent<HTMLTextAreaElement>
@@ -195,8 +205,62 @@ const SOWGenerator = () => {
     handleDownloadDocx()
   };
 
+  const handleLikeSOW = async () => {
+    setIsLikeLoading(true);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/like-sow`, {
+        content: generatedContent,
+      });
+
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "SOW liked successfully",
+        });
+      }
+      setIsLikeLoading(false);
+    } catch (error) {
+      setIsLikeLoading(false);
+      toast({
+        title: "Error",
+        description: error?.message || 'Some error occurred while liking SOW',
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendMessage = () => {
+    setIsGenerating(true);
+    setIsChaGenerating(true);
+    if (!chatInput.trim()) return;
+    const userMsg = { role: 'user' as const, content: chatInput };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    // Send message to backend
+    axios.post(`${API_BASE_URL}/chat`, {
+      message: chatInput,
+      context: generatedContent,
+    })
+    .then((response) => {
+      setGeneratedContent(response.data.message);
+      setIsChaGenerating(false);
+      setIsGenerating(false);
+    }
+    )
+    .catch((error) => {
+      setIsGenerating(false);
+      setIsChaGenerating(false);
+      toast({
+        title: "Error",
+        description: error?.message || 'Some error occurred while sending message',
+        variant: "destructive",
+      });
+    }
+    );
+  };
+
   return (
-    <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
+    <ResizablePanelGroup direction="horizontal" className="min-h-[600px] max-h-[85vh] rounded-lg border">
       <ResizablePanel defaultSize={40} minSize={30}>
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
@@ -358,7 +422,7 @@ const SOWGenerator = () => {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating || !formData.projectObjectives.trim()}
-                className="w-full"
+                className="w-full mb-2"
               >
                 {isGenerating ? (
                   <>
@@ -366,7 +430,7 @@ const SOWGenerator = () => {
                     Generating
                   </>
                 ) : (
-                  "Generate SOW"
+                  "Generate"
                 )}
               </Button>
             </div>
@@ -379,23 +443,72 @@ const SOWGenerator = () => {
       <ResizablePanel defaultSize={60}>
         <div className="p-6 h-full">
           {generatedContent ? (
-            <div className="space-y-4 h-full">
+            <div className="space-y-4 h-full flex flex-col">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Generated SOW</h3>
-                <Button variant="outline" onClick={handleExport}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export to Word
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" onClick={handleLikeSOW} disabled={isLikeLoading}>
+                    {isLikeLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <ThumbsUp className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={handleExport}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export to Word
+                  </Button>
+                </div>
               </div>
-              <Card className="p-6 h-[calc(100%-4rem)] overflow-auto">
+               {/* Chat Interface */}
+               <div className="mt-4 border rounded-lg bg-muted p-4 flex flex-col max-h-[10rem]">
+                <div className="flex-1 overflow-y-auto mb-2 space-y-2">
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`rounded-lg px-3 py-2 max-w-[80%] text-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background border'}`}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    className="flex-1 border rounded px-2 py-1 text-sm"
+                    placeholder="Ask AI to refine your SOW..."
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSendMessage(); }}
+                    disabled={!generatedContent}
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={isChaGenerating || !chatInput.trim() || !generatedContent}
+                    size="sm">
+                      {isChaGenerating ? 'Refining...' : 'Send'}
+                    </Button>
+                </div>
+              </div>
+              <Card className="p-6 h-[calc(100%-15rem)] overflow-auto flex-1">
                 <div className="prose max-w-none">
+                {isChaGenerating ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  </div>
+                ) : (
                   <MarkdownPreview source={generatedContent} />
+                )}
                 </div>
               </Card>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">
-              Generated content will appear here         
+              {isGenerating ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                'Generated content will appear here'       
+              )}
             </div>
           )}
         </div>

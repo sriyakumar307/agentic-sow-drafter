@@ -3,7 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from llm import model
 from config import POSTGRESQL_BASE_URL
+import uuid
 from graph import graph_agentor
+from vector_rag import vector_store
+from langchain_core.documents import Document
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -105,6 +108,54 @@ def generate_sow():
         }
         
         return jsonify(sow_response), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        # Get the request data
+        data = request.get_json()
+        
+        # Extract necessary fields (modify based on your form fields)
+        user_query = data.get("message", "Unknown")
+        generated_sow = data.get("context", "Unknown")
+        
+        # Process the data (For now, we just return a formatted response)
+        response = graph_agentor.invoke({ 'user_query': user_query, 'flow': 'chat', 'previous_sow': generated_sow })
+
+        sow_response = {
+            "status": "success",
+            "message": response['formatted_sow'],
+            "sow_json": response['sow'],
+            "fileName": response['doc_file_path']
+        }
+        
+        return jsonify(sow_response), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/like-sow', methods=['POST'])
+def like_sow():
+    try:
+        # Get the request data
+        data = request.get_json()
+        
+        # Extract necessary fields (modify based on your form fields)
+        sow_content = data.get("content", "Unknown")
+
+        docs = [
+            Document(    
+                page_content=sow_content,
+                metadata={"id": str(uuid.uuid4()), "fileName": "user_generated_sow"},
+            ),
+        ]
+
+        vector_store.add_documents(docs, ids=[doc.metadata["id"] for doc in docs])
+
+        return jsonify({"status": "success", "message": "SOW liked and stored successfully."}), 200
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

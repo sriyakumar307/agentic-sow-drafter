@@ -15,7 +15,6 @@ Using the provided project details and context, generate a meticulously structur
 - Structure content for maximum readability and reference value
 - ⁠If there is any error feedback provided, use that feedback along with the previously generated content to correct and refine the output.
 - include or replace necessary deadlines or timelines in terms section
-- SOW should be comprehensive and very detailed. every section should have at least 200 words and entire should be at least 3 to 4 pages long or 2000 words.
 
 #Required JSON Structure:
 The output MUST include all of the following properties formatted as valid JSON:
@@ -25,18 +24,20 @@ The output MUST include all of the following properties formatted as valid JSON:
 - "End Date": A logical end date based on project timeline
 - "SOW Effective Date": The date from which the SOW becomes valid
 - "Agreement Date": Date of formal agreement between parties
-- "Insight Global": Company information for the service provider
+- "Company Information": Company information for the service provider
+- "Company Name": Name of the service provider organization
+- "Client Name": Name of the client organization
 - "Client": Details about the client organization
 - "Client Contact": Key contact person at client
-- "Insight Global Contact": Key contact person at service provider
+- "Contact": Key contact person at service provider
 - "Services Description": Detailed services from the detailed_desc variable
 - "Deliverables": Complete list from the deliverables variable
 - "Milestones": Key achievements and dates derived from project_timeline
 - "Acceptance": Criteria for deliverable/milestone acceptance
 - "Personnel and Locations": Where work will be performed and by whom
-- "Insight Global Representatives": Key personnel from service provider
+- "Representatives": Key personnel from service provider
 - "Client Representatives": Key personnel from client
-- "Insight Global Contractor Resources": Staffing and resource details
+- "Contractor Resources": Staffing and resource details
 - "Term": Duration and key dates for the engagement
 - "Fees": Complete pricing structure
 - "Expenses": Policy on billable expenses
@@ -54,18 +55,18 @@ The output MUST include all of the following properties formatted as valid JSON:
 - "Termination": Conditions under which the agreement may be terminated
 
 #Input Mapping Instructions:
-- Map {sow_type} to appropriate contractual structure and payment model
-- Map {work_type} to corresponding service categories and delivery approach
-- Map {project_objectives} to "Project Name", "Project Title", and parts of "Scope of Work"
-- Map {project_scope} directly to "Scope of Work" with appropriate structuring
-- Map {detailed_desc} to "Services Description" with comprehensive detailing
-- Map {specific_feature} to appropriate sections within "Deliverables" and "Scope of Work"
-- Map {platform_tech} to technical specifications within "Scope of Work" and "Assumptions"
-- Map {integrations} to integration requirements within "Scope of Work" and "Assumptions"
-- Map {design_specification} to detailed design requirements and standards
-- Map {out_of_scope} to explicit exclusions within "Scope of Work"
-- Map {deliverables} directly to "Deliverables" with acceptance criteria
-- Map {project_timeline} to "Timeline", "Milestones", and "Term" sections
+- Map sow_type to appropriate contractual structure and payment model
+- Map work_type to corresponding service categories and delivery approach
+- Map project_objectives to "Project Name", "Project Title", and parts of "Scope of Work"
+- Map project_scope directly to "Scope of Work" with appropriate structuring
+- Map detailed_desc to "Services Description" with comprehensive detailing
+- Map specific_feature to appropriate sections within "Deliverables" and "Scope of Work"
+- Map platform_tech to technical specifications within "Scope of Work" and "Assumptions"
+- Map integrations to integration requirements within "Scope of Work" and "Assumptions"
+- Map design_specification to detailed design requirements and standards
+- Map out_of_scope to explicit exclusions within "Scope of Work"
+- Map deliverables directly to "Deliverables" with acceptance criteria
+- Map project_timeline to "Timeline", "Milestones", and "Term" sections
 
 #Section Development Guidelines:
 [Keep all your existing section guidelines 1-10 as they are excellent]
@@ -87,6 +88,7 @@ The output MUST include all of the following properties formatted as valid JSON:
 - In JSON always include key value in string format, sections with points can be formatted as markdown if needed
 - In Json do not nest or include any array or nested complex structure should always include string. But you can use markdown to format them accordindly
 - for dates always include human readable date format
+- Ensure that SOW is atleast 8 to 12 pages long or about 1000 to 2500 words and is very detailed.
 """
 
 user_template = """
@@ -147,5 +149,29 @@ drafting_prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_template),
         ("user", user_template)
+    ]
+)
+
+user_chat_prompt = """
+ SOW is alrady generated and now we need to refine it based on the user_query provide below.
+ This is the user_query - {user_query}
+
+ ## Previously Generated SOW: 
+ {previous_sow}
+
+ ## Instructions:
+  - Use the user_query to refine the previously generated SOW.
+  - Ensure that previously generated SOW is not lost and only the necessary changes are made.
+  - Ensure that the final output is a valid JSON document with all required fields.
+
+ ## Feedback Errors
+    {feedback}
+    <!-- Any feedback or errors from different state that needs to be considered -->
+"""
+
+drafting_chat_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_template),
+        ("user", user_chat_prompt)
     ]
 )
