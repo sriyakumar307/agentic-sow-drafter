@@ -11,5 +11,7 @@ model = AzureChatOpenAI(
     deployment_name=AZURE_DEPLOYMENT_NAME,
     openai_api_key=OPENAI_API_KEY,
     openai_api_base=AZURE_API_BASE_URL,
+    # Do not update this values unless Azure API changes it.
+    # This is the default value for Azure OpenAI API and Not Model.
     openai_api_version="2023-05-15",
 )
