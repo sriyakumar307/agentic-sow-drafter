@@ -45,7 +45,7 @@ const defaultValues = {
 5.2.	Final presentation of findings and recommendations
 5.3.	Proposed implementation roadmap
 `,
-  servicesDescription: `.  Insight Global will provide the following Services: 
+  servicesDescription: `HeapSync will provide the following Services: 
 2.1.	Stakeholder Engagement and Current State Analysis A thorough review of existing systems and processes through structured interviews and documentation review.
 2.2.	Technical Evaluation Detailed assessment of current architecture, system capabilities, and integration points.
 2.3.	Gap Analysis and Recommendations Comprehensive analysis of current state versus industry best practices, leading to actionable recommendations.
@@ -59,8 +59,8 @@ const defaultValues = {
   platformsTechnologies: "",
   integrations: "",
   designSpecifications: "",
-  outOfScope: `As a condition for recovery of any liability, the parties must assert any claim under this SOW within three (3) months after discovery or sixty (60) days after the termination or expiration of this SOW, whichever is earlier. In no event will either party to this Agreement be liable for incidental, consequential, punitive, indirect or special damages, including, without limitation, interruption or loss of business, profit or goodwill.  In no event shall Insight Global’s liability to Client exceed the fees received from Client under this SOW during the six (6) month period preceding the claim to which the liability relates, whether arising from an alleged breach of the Agreement or this SOW, an alleged tort, or any other cause of action.`,
-  deliverables: `.  Insight Global will provide the following Deliverables: 
+  outOfScope: `As a condition for recovery of any liability, the parties must assert any claim under this SOW within three (3) months after discovery or sixty (60) days after the termination or expiration of this SOW, whichever is earlier. In no event will either party to this Agreement be liable for incidental, consequential, punitive, indirect or special damages, including, without limitation, interruption or loss of business, profit or goodwill.  In no event shall HeapSync's liability to Client exceed the fees received from Client under this SOW during the six (6) month period preceding the claim to which the liability relates, whether arising from an alleged breach of the Agreement or this SOW, an alleged tort, or any other cause of action.`,
+  deliverables: `.  HeapSync will provide the following Deliverables: 
 3.1.	Current State Analysis report of existing systems, data flows, and identified opportunities for improvement.
 3.2.	Technical Assessment report with detailed evaluation of current architecture, including integration analysis and technology stack assessment.
 3.3.	Final Recommendations report of complete modernization strategy including target architecture, implementation roadmap, and strategy

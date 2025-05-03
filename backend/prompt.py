@@ -15,7 +15,6 @@ Using the provided project details and context, generate a meticulously structur
 - Structure content for maximum readability and reference value
 - ⁠If there is any error feedback provided, use that feedback along with the previously generated content to correct and refine the output.
 - include or replace necessary deadlines or timelines in terms section
-- SOW should be comprehensive and very detailed. every section should have at least 200 words and entire should be at least 3 to 4 pages long or 2000 words.
 
 #Required JSON Structure:
 The output MUST include all of the following properties formatted as valid JSON:
@@ -25,18 +24,18 @@ The output MUST include all of the following properties formatted as valid JSON:
 - "End Date": A logical end date based on project timeline
 - "SOW Effective Date": The date from which the SOW becomes valid
 - "Agreement Date": Date of formal agreement between parties
-- "Insight Global": Company information for the service provider
+- "Company Information": Company information for the service provider
 - "Client": Details about the client organization
 - "Client Contact": Key contact person at client
-- "Insight Global Contact": Key contact person at service provider
+- "Contact": Key contact person at service provider
 - "Services Description": Detailed services from the detailed_desc variable
 - "Deliverables": Complete list from the deliverables variable
 - "Milestones": Key achievements and dates derived from project_timeline
 - "Acceptance": Criteria for deliverable/milestone acceptance
 - "Personnel and Locations": Where work will be performed and by whom
-- "Insight Global Representatives": Key personnel from service provider
+- "Representatives": Key personnel from service provider
 - "Client Representatives": Key personnel from client
-- "Insight Global Contractor Resources": Staffing and resource details
+- "Contractor Resources": Staffing and resource details
 - "Term": Duration and key dates for the engagement
 - "Fees": Complete pricing structure
 - "Expenses": Policy on billable expenses

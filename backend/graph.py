@@ -147,10 +147,10 @@ def validate_sow_data(sow_data):
 
 def extract_json_from_sow(raw_sow: str) -> dict:
     extraction_prompt = (
-        '''"Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date", "Insight Global", "Client", "Agreement Date",
-"Client Contact", "Insight Global Contact", "Services Description", "Deliverables",
-"Milestones", "Acceptance", "Personnel and Locations", "Insight Global Representatives",
-"Client Representatives", "Insight Global Contractor Resources", "Term", "Fees", "Expenses",
+        '''"Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date","Company Information", "Client", "Agreement Date",
+"Client Contact", "Contact", "Services Description", "Deliverables",
+"Milestones", "Acceptance", "Personnel and Locations", "Representatives",
+"Client Representatives", "Contractor Resources", "Term", "Fees", "Expenses",
 "Taxes", "Conversion", "Limitation of Liability", "Service Level Agreement", "Assumptions", "Scope of Work",
 "Change Process", "Payment Terms", "Timeline".
 ''' + raw_sow +
@@ -192,8 +192,8 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     markdown += f'## {sow_data["Project Name"]}\n\n'
     
     intro = (f"This Statement of Work (“SOW”) is entered into as of {sow_data['SOW Effective Date']} by and between "
-             f"{sow_data['Insight Global']} (“Insight Global”) and {sow_data['Client']} (“Client”) under the provisions of "
-             f"that certain Master Services Agreement, dated as of {sow_data['Agreement Date']}, by and between Insight Global and Client (the “Agreement”).")
+             f"{sow_data['Company Information']} (“YOUR NAME”) and {sow_data['Client']} (“Client”) under the provisions of "
+             f"that certain Master Services Agreement, dated as of {sow_data['Agreement Date']}, by and between YOUR NAME and Client (the “Agreement”).")
     doc.add_paragraph(intro)
     markdown += f"{intro}{newLineChar}"
     
@@ -204,8 +204,8 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     
     section_order = [
         "Services Description", "Deliverables", "Milestones", "Acceptance",
-        "Personnel and Locations", "Insight Global Representatives", "Client Representatives",
-        "Insight Global Contractor Resources", "Term", "Fees", "Expenses", "Taxes", "Conversion",
+        "Personnel and Locations", "Representatives", "Client Representatives",
+        "Contractor Resources", "Term", "Fees", "Expenses", "Taxes", "Conversion",
         "Limitation of Liability", "Service Level Agreement", "Assumptions", "Change Process"
     ]
     for section in section_order:
@@ -224,8 +224,8 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     markdown += f"Authorized signatures effective as of the effective date of this SOW.{newLineChar}"
     doc.add_paragraph("Client Signature: ________________")
     markdown += f"Client Signature: ________________{newLineChar}"
-    doc.add_paragraph("Insight Global Signature: ________________")
-    markdown += f"Insight Global Signature: ________________{newLineChar}"
+    doc.add_paragraph("Signature: ________________")
+    markdown += f"Signature: ________________{newLineChar}"
 
     static_folder = os.path.join(os.path.dirname(__file__), 'static')
     if not os.path.exists(static_folder):
