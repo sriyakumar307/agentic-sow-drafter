@@ -221,11 +221,13 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
         "Contractor Resources", "Terms & Conditions", "Fees", "Expenses", "Taxes", "Conversion",
         "Limitation of Liability", "Service Level Agreement", "Assumptions", "Change Process"
     ]
+    
     for section in section_order:
         doc.add_heading(section, level=1)
         markdown += f"## {section}{newLineChar}"
         try: 
-            doc.add_paragraph(sow_data[section])
+            cleaned_text = re.sub(r"\*\*(.*?)\*\*", r"\1", sow_data[section])
+            doc.add_paragraph(cleaned_text)
             markdown += f"{sow_data[section]}{newLineChar}"
         except Exception as e:
             doc.add_paragraph('')

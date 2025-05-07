@@ -83,7 +83,7 @@ const defaultValues = {
 }
 
 const SOWGenerator = () => {
-  const [formData, setFormData] = useState<SOWFormData>({
+  const [formData, setFormData] = useState<SOWFormData>( {
     sowType: "",
     workType: "",
     projectObjectives: "",
