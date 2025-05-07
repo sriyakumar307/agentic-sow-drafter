@@ -15,14 +15,17 @@ Using the provided project details and context, generate a meticulously structur
 - Structure content for maximum readability and reference value
 - ⁠If there is any error feedback provided, use that feedback along with the previously generated content to correct and refine the output.
 - include or replace necessary deadlines or timelines in terms section
-
+- Never mention any name or address in the SOW. Use some placeholders always.
+- Never assume following things - Name, address, start date, end date, agreement, amount or sensitive or PII information unless explicitly provided in the Technical Specification Form.
+- Always use professional and legally-precise language throughout the SOW.
+ 
 #Required JSON Structure:
 The output MUST include all of the following properties formatted as valid JSON:
 - "Project Name": Derived from project objectives and scope
 - "Project Title": A professional title capturing the core purpose of the engagement
 - "Start Date": A reasonable project start date based on context
 - "End Date": A logical end date based on project timeline
-- "SOW Effective Date": The date from which the SOW becomes valid
+- "SOW Effective Date": The date from which the SOW becomes valid only if specified in user input or else just use placeholder.
 - "Agreement Date": Date of formal agreement between parties
 - "Company Information": Company information for the service provider
 - "Company Name": Name of the service provider organization
@@ -38,7 +41,7 @@ The output MUST include all of the following properties formatted as valid JSON:
 - "Representatives": Key personnel from service provider
 - "Client Representatives": Key personnel from client
 - "Contractor Resources": Staffing and resource details
-- "Term": Duration and key dates for the engagement
+- "Terms & Conditions": Duration and key dates for the engagement
 - "Fees": Complete pricing structure
 - "Expenses": Policy on billable expenses
 - "Taxes": Tax handling and responsibility
@@ -66,7 +69,7 @@ The output MUST include all of the following properties formatted as valid JSON:
 - Map design_specification to detailed design requirements and standards
 - Map out_of_scope to explicit exclusions within "Scope of Work"
 - Map deliverables directly to "Deliverables" with acceptance criteria
-- Map project_timeline to "Timeline", "Milestones", and "Term" sections
+- Map project_timeline to "Timeline", "Milestones", and "Terms & Conditions" sections
 
 #Section Development Guidelines:
 [Keep all your existing section guidelines 1-10 as they are excellent]
@@ -85,9 +88,8 @@ The output MUST include all of the following properties formatted as valid JSON:
 - Adapt terminology and specificity to match the industry and project type
 - Generate content that could reasonably stand up to legal scrutiny in a business context
 - EVERY field listed in the required JSON structure MUST be present in your output
-- In JSON always include key value in string format, sections with points can be formatted as markdown if needed
+- In JSON always include key value in string format, sections with points can be formatted as markdown if needed but do not include headings
 - In Json do not nest or include any array or nested complex structure should always include string. But you can use markdown to format them accordindly
-- for dates always include human readable date format
 - Ensure that SOW is atleast 8 to 12 pages long or about 1000 to 2500 words and is very detailed.
 """
 
@@ -136,13 +138,15 @@ Deliverables are: {deliverables}
 Project Timeline and Schedule is: {project_timeline}
 <!-- Provide detailed schedule with development phases, testing windows, deployment timeframes, and key milestones -->
 
-## Additional Instructions
-{additional_context}
-<!-- Any special considerations, previous SOW format or examples -->
-
 ## Feedback Errors
 {feedback}
 <!-- Any feedback or errors from different state that needs to be considered -->
+
+## Additional Format or Example for Reference
+Do not include any sensitive or PII information or date given in the below context, only use it for structure and format reference.
+{additional_context}
+<!-- Any special considerations, previous SOW format or examples -->
+
 """
 
 drafting_prompt_template = ChatPromptTemplate.from_messages(

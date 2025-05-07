@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { Card } from "@/components/ui/card";
-import { Loader2, Download, ThumbsUp } from "lucide-react";
+import { Loader2, Download, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Label } from "@/components/ui/label";
@@ -83,7 +83,7 @@ const defaultValues = {
 }
 
 const SOWGenerator = () => {
-  const [formData, setFormData] = useState<SOWFormData>(defaultValues || {
+  const [formData, setFormData] = useState<SOWFormData>({
     sowType: "",
     workType: "",
     projectObjectives: "",
@@ -453,6 +453,9 @@ const SOWGenerator = () => {
                     ) : (
                       <ThumbsUp className="w-4 h-4" />
                     )}
+                  </Button>
+                  <Button variant="outline" disabled>
+                      <ThumbsDown className="w-4 h-4" />
                   </Button>
                   <Button variant="outline" onClick={handleExport}>
                     <Download className="w-4 h-4 mr-2" />

@@ -163,7 +163,7 @@ def extract_json_from_sow(raw_sow: str) -> dict:
         "Project Name", "End Date", "Confidentiality", "Intellectual Property", "Termination", "Project Title", "Start Date", "End Date", "Project Name", "SOW Effective Date","Company Information", "Client", "Agreement Date",
 "Client Contact", "Contact", "Services Description", "Deliverables",
 "Milestones", "Acceptance", "Personnel and Locations", "Representatives",
-"Client Representatives", "Contractor Resources", "Term", "Fees", "Expenses",
+"Client Representatives", "Contractor Resources", "Terms & Conditions", "Fees", "Expenses",
 "Taxes", "Conversion", "Limitation of Liability", "Service Level Agreement", "Assumptions", "Scope of Work",
 "Change Process", "Payment Terms", "Timeline", "Company Name", "Client Name",
 ''' + raw_sow +
@@ -218,7 +218,7 @@ def generate_sow(sow_data, output_filename="Generated_SOW_final.docx"):
     section_order = [
         "Services Description", "Deliverables", "Milestones", "Acceptance",
         "Personnel and Locations", "Representatives", "Client Representatives",
-        "Contractor Resources", "Term", "Fees", "Expenses", "Taxes", "Conversion",
+        "Contractor Resources", "Terms & Conditions", "Fees", "Expenses", "Taxes", "Conversion",
         "Limitation of Liability", "Service Level Agreement", "Assumptions", "Change Process"
     ]
     for section in section_order:
