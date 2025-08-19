@@ -1,69 +1,72 @@
-# Welcome to your Lovable project
+# 🧠 Multi-Agent-System for SOW Drafting
 
-## Project info
+A full-stack AI-powered tool to dynamically generate Statements of Work (SOW) using agentic workflows and memory-based retrieval.
 
-**URL**: https://lovable.dev/projects/e62798a6-be07-47af-84d7-418249bc5409
+## 🚀 Tech Stack
 
-## How can I edit this code?
+- **Frontend**: React  
+- **Backend**: Python, Flask  
+- **AI Orchestration**: LangGraph  
+- **Vector DB**: pgvector (PostgreSQL)  
+- **Embedding & Memory**: LangChain-compatible memory with pgvector
 
-There are several ways of editing your application
+## 🖥️ Frontend Setup (React)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/e62798a6-be07-47af-84d7-418249bc5409) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+cd frontend
+yarn install
+yarn run dev
 ```
 
-**Edit a file directly in GitHub**
+Make sure to update the API_BASE_URL in `frontend\src\components\SOWGenerator.tsx` with the url backend is running at.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
+## 🧠 Backend Setup (Python + Flask + LangGraph)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-## What technologies are used for this project?
+### 1. Setup Environment Variables
 
-This project is built with .
+Create a `.env` file in the root of `/backend` based on `.env-example`:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+cp .env-example .env
+```
 
-## How can I deploy this project?
+Update the required keys (e.g., OpenAI API Key, DB connection string).
 
-Simply open [Lovable](https://lovable.dev/projects/e62798a6-be07-47af-84d7-418249bc5409) and click on Share -> Publish.
+### 2. Setup PostgreSQL with pgvector
 
-## I want to use a custom domain - is that possible?
+Ensure your PostgreSQL instance has the `pgvector` extension enabled:
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+Create necessary tables using your preferred method or provided migrations (if any).
+
+### 3. Run vector migrations
+
+```bash
+python generate_sample_embeddings.py
+```
+
+### 4. Run the Backend
+
+```bash
+python app.py
+```
+
+The Flask server will start and handle LangGraph-based multi-agent interactions and vector DB retrieval.
+
+---
+
+## ⚠️ Notes
+
+- Ensure both front and backend servers are running simultaneously.  
+- You may need to allow CORS depending on deployment.  
+- This project assumes access to OpenAI or Hugging Face for LLM calls.  
+
